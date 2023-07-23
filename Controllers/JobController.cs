@@ -14,7 +14,7 @@ namespace CRUDApi.Controllers
     public class JobController : Controller
     {
         private readonly IndeedJobsContext _context;
-        
+
         private readonly IJobRepository _jobRepository;
 
 
@@ -26,19 +26,24 @@ namespace CRUDApi.Controllers
 
         // GET: Job
         // GET: Jobs
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string keyword, string location)
         {
             try
             {
-                await _jobRepository.GetJobsFromAPIAsync(); // Fetch jobs from API and save to local database
-                return View(await _jobRepository.GetJobsAsync()); // Fetch jobs from local database and pass to the View
+                if (!string.IsNullOrWhiteSpace(keyword) || !string.IsNullOrWhiteSpace(location))
+                {
+                    // Fetch jobs from the API based on user input
+                    await _jobRepository.GetJobsFromAPIAsync(keyword, location);
+                }
+
+                var jobs = await _jobRepository.GetJobsAsync(); // Fetch jobs from the local database
+                return View(jobs);
             }
             catch (Exception ex)
             {
-                return Problem($"Error fetching jobs from API: {ex.Message}");
+                return Problem($"Error fetching jobs: {ex.Message}");
             }
         }
-
 
         // GET: Job/Details/5
         public async Task<IActionResult> Details(int? id)

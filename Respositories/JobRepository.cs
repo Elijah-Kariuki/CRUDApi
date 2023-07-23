@@ -29,14 +29,26 @@ namespace CRUDApi.Repositories
             return await _context.Jobs.ToListAsync();
         }
 
-        public async Task<string> GetJobsFromAPIAsync()
+        public async Task<string> GetJobsFromAPIAsync(string keyword, string location)
         {
+            if (string.IsNullOrWhiteSpace(keyword) || string.IsNullOrWhiteSpace(location))
+            {
+                throw new ArgumentException("Both keyword or location cannot be empty.");
+            }
+
+            // Replace spaces in keyword and location with '+'
+            keyword = keyword.Replace(" ", "+");
+            location = location.Replace(" ", "+");
+
+            string keywordParam = $"&keyword={Uri.EscapeDataString(keyword)}";
+            string locationParam = $"&location={Uri.EscapeDataString(location)}";
+
             using (var client = new HttpClient())
             {
                 var request = new HttpRequestMessage
                 {
                     Method = HttpMethod.Get,
-                    RequestUri = new Uri("https://indeed-jobs-api.p.rapidapi.com/indeed-us/?offset=0&keyword=software+engineer&location=tennessee"),
+                    RequestUri = new Uri($"https://indeed-jobs-api.p.rapidapi.com/indeed-us/?offset=0{keywordParam}{locationParam}"),
                     Headers =
             {
                 { "X-RapidAPI-Key", _configuration["RapidAPI:Key"] },
@@ -77,8 +89,6 @@ namespace CRUDApi.Repositories
         }
 
 
-
-
         public async Task<Job?> GetJobAsync(int id)
         {
             return await _context.Jobs.FirstOrDefaultAsync(m => m.Id == id);
@@ -111,6 +121,4 @@ namespace CRUDApi.Repositories
             return (_context.Jobs?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
-
-
 }

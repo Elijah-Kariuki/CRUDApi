@@ -7,7 +7,7 @@ namespace CRUDApi.Interfaces
     public interface IJobRepository
     {
         Task<IEnumerable<Job>> GetJobsAsync();
-        Task<string> GetJobsFromAPIAsync();
+        Task<string> GetJobsFromAPIAsync(string keyword, string location);
         Task<Job?> GetJobAsync(int id);
         Task AddJobAsync(Job job);
         Task UpdateJobAsync(Job job);

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CRUDApi.Migrations
 {
     [DbContext(typeof(IndeedJobsContext))]
-    [Migration("20230722155640_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20230723030836_IntialCreate")]
+    partial class IntialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -1,0 +1,26 @@
+﻿@model CRUDApi.Models.JobSearchRequest
+
+<h2>Search Jobs</h2>
+
+@using (Html.BeginForm("Search", "Job", FormMethod.Post))
+{
+    <div class="form-group">
+        @Html.LabelFor(m => m.Keyword)
+        @Html.TextBoxFor(m => m.Keyword, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Keyword)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Location)
+        @Html.TextBoxFor(m => m.Location, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Location)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Search</button>
+}
+
+@if (Model.JsonResponse != null)
+{
+    <h3>Search Results:</h3>
+    <pre>@Html.Raw(Model.JsonResponse)</pre>
+}

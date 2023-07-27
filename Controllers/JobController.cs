@@ -8,15 +8,14 @@ using Microsoft.EntityFrameworkCore;
 using CRUDApi.Data;
 using CRUDApi.Models;
 using CRUDApi.Interfaces;
+using Newtonsoft.Json; // Add this using statement for Newtonsoft.Json
 
 namespace CRUDApi.Controllers
 {
     public class JobController : Controller
     {
         private readonly IndeedJobsContext _context;
-        
         private readonly IJobRepository _jobRepository;
-
 
         public JobController(IndeedJobsContext context, IJobRepository jobRepository)
         {
@@ -26,12 +25,14 @@ namespace CRUDApi.Controllers
 
         // GET: Job
         // GET: Jobs
-        public async Task<IActionResult> Index()
+        [ResponseCache(Duration =1800)]
+        public async Task<IActionResult> Index(JobSearchRequest searchRequest)
         {
             try
             {
-                await _jobRepository.GetJobsFromAPIAsync(); // Fetch jobs from API and save to local database
-                return View(await _jobRepository.GetJobsAsync()); // Fetch jobs from local database and pass to the View
+                await _jobRepository.GetJobsFromAPIAsync(searchRequest); // Fetch jobs from API and save to the local database
+                var jobs = await _jobRepository.GetJobsAsync(); // Fetch jobs from the local database
+                return View(jobs);
             }
             catch (Exception ex)
             {
@@ -39,6 +40,7 @@ namespace CRUDApi.Controllers
             }
         }
 
+        
 
         // GET: Job/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -156,21 +158,48 @@ namespace CRUDApi.Controllers
         {
             if (_context.Jobs == null)
             {
-                return Problem("Entity set 'IndeedJobsContext.Jobs'  is null.");
+                return Problem("Entity set 'IndeedJobsContext.Jobs' is null.");
             }
             var job = await _context.Jobs.FindAsync(id);
             if (job != null)
             {
                 _context.Jobs.Remove(job);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: Job/Search
+        public IActionResult Search()
+        {
+            return View(new JobSearchRequest());
+        }
+
+        // POST: Job/Search
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Search(JobSearchRequest searchRequest)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _jobRepository.GetJobsFromAPIAsync(searchRequest); // Fetch jobs from API and save to the local database based on search parameters
+                    var jobs = await _jobRepository.GetJobsAsync(); // Fetch jobs from the local database
+                    return View(nameof(Index), jobs);
+                }
+                catch (Exception ex)
+                {
+                    return Problem($"Error fetching jobs from API: {ex.Message}");
+                }
+            }
+            return View(searchRequest);
+        }
+
         private bool JobExists(int id)
         {
-          return (_context.Jobs?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Jobs?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

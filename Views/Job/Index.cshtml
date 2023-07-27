@@ -14,9 +14,6 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.CompanyLogoUrl)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.CompanyName)
             </th>
             <th>
@@ -29,10 +26,7 @@
                 @Html.DisplayNameFor(model => model.CompanyReviews)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Date)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.JobLocation)
+                @Html.DisplayNameFor(model => model.CompanyLogoUrl)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.JobTitle)
@@ -41,13 +35,13 @@
                 @Html.DisplayNameFor(model => model.JobUrl)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.JobLocation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Date)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.MultipleHiring)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NextPage)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PageNumber)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Position)
@@ -62,59 +56,66 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.CompanyLogoUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CompanyName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CompanyRating)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CompanyReviewLink)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CompanyReviews)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Date)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.JobLocation)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.JobTitle)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.JobUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MultipleHiring)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NextPage)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PageNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Position)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Salary)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UrgentlyHiring)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CompanyName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CompanyRating)
+                </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.CompanyReviewLink))
+                    {
+                        <a href="@item.CompanyReviewLink" target="_blank">
+                            @Html.DisplayFor(modelItem => item.CompanyReviewLink)
+                        </a>
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CompanyReviews)
+                </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.CompanyLogoUrl))
+                    {
+                        <img src="@item.CompanyLogoUrl" alt="Company Logo" style="max-width: 100px; max-height: 100px;" />
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.JobTitle)
+                </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.JobUrl))
+                    {
+                        Uri uri = new Uri(item.JobUrl);
+                        <a href="@item.JobUrl" target="_blank">@uri.Host</a>
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.JobLocation)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Date)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MultipleHiring)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Position)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Salary)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UrgentlyHiring)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

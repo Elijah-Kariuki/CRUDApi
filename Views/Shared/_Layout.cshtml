@@ -6,12 +6,13 @@
     <title>@ViewData["Title"] - IndeedJobs</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/IndeedJobs.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Job" asp-action="Index">IndeedJobs</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">IndeedJobs</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -19,17 +20,17 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Job" asp-action="Index">View Jobs</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Job" asp-action="Create">Post a Job</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Job" asp-action="Index">Job</a>
+                        </li>
+                        <!-- Add the Job Search link to the navigation bar -->
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Job" asp-action="Search">Job Search</a>
                         </li>
                     </ul>
-                    <form class="form-inline my-2 my-lg-0" asp-controller="Job" asp-action="GetJobsFromAPIAsync">
-                        <input class="form-control mr-sm-2" type="search" placeholder="Keyword" name="keyword" aria-label="Search">
-                        <input class="form-control mr-sm-2" type="search" placeholder="Location" name="location" aria-label="Location">
-                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                    </form>
+                    
                 </div>
             </div>
         </nav>
@@ -39,6 +40,7 @@
             @RenderBody()
         </main>
     </div>
+
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2023 - IndeedJobs - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
@@ -47,6 +49,6 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @RenderSection("Scripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

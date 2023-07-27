@@ -7,7 +7,7 @@ namespace CRUDApi.Interfaces
     public interface IJobRepository
     {
         Task<IEnumerable<Job>> GetJobsAsync();
-        Task<string> GetJobsFromAPIAsync(string keyword, string location);
+        Task<string> GetJobsFromAPIAsync(JobSearchRequest? searchRequest); // New method for external search
         Task<Job?> GetJobAsync(int id);
         Task AddJobAsync(Job job);
         Task UpdateJobAsync(Job job);
@@ -15,4 +15,3 @@ namespace CRUDApi.Interfaces
         bool JobExists(int id);
     }
 }
-

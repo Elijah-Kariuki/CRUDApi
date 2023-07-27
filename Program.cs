@@ -18,6 +18,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Configuration.AddUserSecrets<JobRepository>();
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: true);
+builder.Services.AddMemoryCache();
 
 // Add your DbContext configuration here
 builder.Services.AddDbContext<IndeedJobsContext>(options =>
@@ -45,10 +46,7 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+
 
 app.MapControllerRoute(
     name: "default",

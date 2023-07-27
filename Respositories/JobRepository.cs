@@ -2,26 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
 using CRUDApi.Data;
 using CRUDApi.Models;
-using Microsoft.EntityFrameworkCore;
 using CRUDApi.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRUDApi.Repositories
 {
-
     public class JobRepository : IJobRepository
     {
         private readonly IndeedJobsContext _context;
         private readonly IConfiguration _configuration;
-        public JobRepository(IndeedJobsContext context, IConfiguration configuration)
+        private readonly IMemoryCache _cache;
+
+        public JobRepository(IndeedJobsContext context, IConfiguration configuration, IMemoryCache cache)
         {
             _context = context;
             _configuration = configuration;
+            _cache = cache;
         }
 
         public async Task<IEnumerable<Job>> GetJobsAsync()
@@ -29,31 +31,34 @@ namespace CRUDApi.Repositories
             return await _context.Jobs.ToListAsync();
         }
 
-        public async Task<string> GetJobsFromAPIAsync(string keyword, string location)
+        public async Task<string> GetJobsFromAPIAsync(JobSearchRequest? searchRequest)
         {
-            if (string.IsNullOrWhiteSpace(keyword) || string.IsNullOrWhiteSpace(location))
+            if (searchRequest == null)
             {
-                throw new ArgumentException("Both keyword or location cannot be empty.");
+                return string.Empty;
             }
 
-            // Replace spaces in keyword and location with '+'
-            keyword = keyword.Replace(" ", "+");
-            location = location.Replace(" ", "+");
+            // Use null-conditional operator to handle possible null values
+            var keyword = Uri.EscapeDataString(searchRequest.Keyword ?? string.Empty);
+            var location = Uri.EscapeDataString(searchRequest.Location ?? string.Empty);
 
-            string keywordParam = $"&keyword={Uri.EscapeDataString(keyword)}";
-            string locationParam = $"&location={Uri.EscapeDataString(location)}";
+            // Check if the data is already cached
+            if (_cache.TryGetValue<string>(GetCacheKey(keyword, location), out var cachedResponse))
+            {
+                return cachedResponse;
+            }
 
             using (var client = new HttpClient())
             {
                 var request = new HttpRequestMessage
                 {
                     Method = HttpMethod.Get,
-                    RequestUri = new Uri($"https://indeed-jobs-api.p.rapidapi.com/indeed-us/?offset=0{keywordParam}{locationParam}"),
+                    RequestUri = new Uri($"https://indeed-jobs-api.p.rapidapi.com/indeed-us/?offset=0&keyword={keyword}&location={location}"),
                     Headers =
-            {
-                { "X-RapidAPI-Key", _configuration["RapidAPI:Key"] },
-                { "X-RapidAPI-Host", _configuration["RapidAPI:Host"] },
-            },
+                    {
+                        { "X-RapidAPI-Key", _configuration["RapidAPI:Key"] },
+                        { "X-RapidAPI-Host", _configuration["RapidAPI:Host"] },
+                    },
                 };
 
                 using (var response = await client.SendAsync(request))
@@ -83,11 +88,13 @@ namespace CRUDApi.Repositories
                         Console.WriteLine($"Exception encountered: {ex.Message}");
                     }
 
+                    // Cache the response
+                    _cache.Set(GetCacheKey(keyword, location), jsonResponse, TimeSpan.FromMinutes(30));
+
                     return jsonResponse;
                 }
             }
         }
-
 
         public async Task<Job?> GetJobAsync(int id)
         {
@@ -119,6 +126,12 @@ namespace CRUDApi.Repositories
         public bool JobExists(int id)
         {
             return (_context.Jobs?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        // Helper method to generate a unique cache key
+        private string GetCacheKey(string keyword, string location)
+        {
+            return $"JobAPIResponse_{keyword}_{location}";
         }
     }
 }
